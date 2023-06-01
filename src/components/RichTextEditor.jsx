@@ -2,17 +2,16 @@ import { useRef, useEffect } from "react";
 export default function RichTextEditor() {
   const textAreaRef = useRef(null);
 
-  function handleConvert() {}
-
   function getSelectionStartAndEnd(anchorOffset, focusOffset) {
     const start = anchorOffset <= focusOffset ? anchorOffset : focusOffset;
     const end = start === anchorOffset ? focusOffset : anchorOffset;
     return [start, end];
   }
   useEffect(() => {
-    textAreaRef.current.innerHTML = "Bold";
+    textAreaRef.current.innerHTML = "Bold is beautiful";
   });
 
+  const tag = "b";
   function handleBold() {
     const selection = document.getSelection();
     console.log(
@@ -64,7 +63,7 @@ export default function RichTextEditor() {
 
           // console.log(parentNode.childNodes);
 
-          const updatedChild = `${textBefore}<b>${selectedText}</b>${textAfter}`;
+          const updatedChild = `${textBefore}<${tag}>${selectedText}</${tag}>${textAfter}`;
 
           let parentUpdatedInnerHtml = "";
 
@@ -99,10 +98,10 @@ export default function RichTextEditor() {
         const anchorText = `${anchorNode.textContent.substring(
           0,
           anchorOffset
-        )}<b>${anchorUpdate}</b>`;
+        )}<${tag}>${anchorUpdate}</${tag}>`;
 
         const focusUpdate = focusNode.textContent.substring(0, focusOffset);
-        const focusText = `<b>${focusUpdate}</b>${focusNode.textContent.substring(
+        const focusText = `<${tag}>${focusUpdate}</${tag}>${focusNode.textContent.substring(
           focusOffset
         )}`;
         console.log(anchorUpdate + " " + focusUpdate);
@@ -138,17 +137,28 @@ export default function RichTextEditor() {
     } else {
       return;
     }
+    selection.collapseToEnd();
+
     console.log("text area now has : ", textAreaRef.current.innerHTML);
   }
 
-  //Not relevant to mutation as of now
-  function handleSayHello() {
-    const divNode = textAreaRef.current;
-    const spanNode = document.createElement("span");
-    const textNode = document.createTextNode("Hello!");
-    spanNode.appendChild(textNode);
-    divNode.appendChild(spanNode);
-    divNode.style.backgroundColor = "#ff0000";
+  function handleAddBullet() {
+    const selection = window.getSelection();
+    if (selection.isCollapsed) {
+      console.log(selection);
+      const parentElement = selection.anchorNode.parentElement;
+      const innerText = parentElement.innerHTML;
+      parentElement.innerHTML =
+        innerText.substring(0, selection.anchorOffset) +
+        "<ul><li></li></ul>" +
+        innerText.substring(selection.anchorOffset, innerText.length);
+      // parentElement.innerHTML = ;
+      // const listNode = document.createElement("ul");
+      // const listItemNode = document.createElement("li");
+      // listNode.appendChild(listItemNode);
+      // parentElement.appendChild(listNode);
+      console.log(parentElement);
+    }
   }
 
   return (
@@ -156,6 +166,7 @@ export default function RichTextEditor() {
       <div
         className="container"
         style={{
+          padding: "20px",
           height: "100px",
           backgroundColor: "aqua",
           border: "1px solid black",
@@ -163,8 +174,8 @@ export default function RichTextEditor() {
         contentEditable={true}
         ref={textAreaRef}
       ></div>
-      <button onClick={handleSayHello}>say hello</button>
       <button onClick={handleBold}>bold</button>
+      <button onClick={handleAddBullet}>add bullet</button>
     </div>
   );
 }
